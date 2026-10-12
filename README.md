@@ -1,4 +1,4 @@
-# lag-ff - OPhim Downloader 🎬
+# dowload-video-page - OPhim Downloader 🎬
 
 Tool tìm kiếm và tải phim từ API OPhim với giao diện Web hiện đại và CLI mạnh mẽ. Hỗ trợ chạy trực tiếp trên **GitHub Actions** (cloud runner tải phim siêu tốc) hoặc chạy local trên máy tính cá nhân.
 
@@ -18,7 +18,7 @@ Tool tìm kiếm và tải phim từ API OPhim với giao diện Web hiện đ�
 
 Bạn có thể chạy tải phim trực tiếp trên GitHub mà không cần bật máy tính hay cài đặt bất cứ phần mềm nào:
 
-1. Truy cập vào kho mã nguồn của bạn trên GitHub: `https://github.com/ruanhou23/lag-ff`
+1. Truy cập vào kho mã nguồn của bạn trên GitHub: `https://github.com/ruanhou23/dowload-video-page`
 2. Nhấn vào tab **Actions** ở menu phía trên.
 3. Ở cột bên trái, chọn workflow **"Tải Phim Trực Tiếp Trên GitHub (OPhim Downloader)"**.
 4. Nhấn nút **"Run workflow"** ở góc phải:
@@ -54,8 +54,8 @@ Bạn có thể chạy tải phim trực tiếp trên GitHub mà không cần b�
 
 ```bash
 # Clone repo về máy
-git clone https://github.com/ruanhou23/lag-ff.git
-cd lag-ff
+git clone https://github.com/ruanhou23/dowload-video-page.git
+cd dowload-video-page
 
 # Cài đặt các thư viện cần thiết
 npm install
