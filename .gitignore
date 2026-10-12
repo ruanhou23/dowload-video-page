@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Downloaded videos
+downloads/
+*.mp4
+*.mkv
+*.ts
+
+# Environment & logs
+.env
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tool caches
+.claude/
+__pycache__/
+*.pyc

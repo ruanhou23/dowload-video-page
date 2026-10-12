@@ -1,0 +1,94 @@
+name: Tải Phim Trực Tiếp Trên GitHub (OPhim Downloader)
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Slug hoặc tên mã phim (Ví dụ: tro-choi-con-muc-phan-2)'
+        required: true
+        type: string
+      episodes:
+        description: 'Tập cần tải (nhập "all" để tải toàn bộ, hoặc nhập số tập như 0 hoặc 0,1,2)'
+        required: true
+        default: 'all'
+        type: string
+      server:
+        description: 'Server index (mặc định: 0)'
+        required: false
+        default: '0'
+        type: string
+      save_folder:
+        description: 'Thư mục lưu video tải về trên runner (Mặc định: downloads)'
+        required: false
+        default: 'downloads'
+        type: string
+      create_release:
+        description: 'Tạo GitHub Release để lưu trữ file vĩnh viễn (True/False)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  download-movie:
+    name: Tải video phim
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Cài đặt Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Cài đặt thư viện Node.js
+        run: npm install
+
+      - name: 🎬 Cài đặt FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version
+
+      - name: 🚀 Chạy tải phim về thư mục được chọn
+        run: |
+          mkdir -p "${{ inputs.save_folder }}"
+          echo "Bắt đầu tải phim: ${{ inputs.slug }}"
+          echo "Thư mục lưu: ${{ inputs.save_folder }}"
+          
+          if [ "${{ inputs.episodes }}" = "all" ]; then
+            node download.js dl "${{ inputs.slug }}" --all -s "${{ inputs.server }}" -o "${{ inputs.save_folder }}"
+          else
+            node download.js dl "${{ inputs.slug }}" -e "${{ inputs.episodes }}" -s "${{ inputs.server }}" -o "${{ inputs.save_folder }}"
+          fi
+
+      - name: 📂 Kiểm tra danh sách video đã tải
+        run: |
+          echo "Danh sách video trong thư mục ${{ inputs.save_folder }}:"
+          ls -lhR "${{ inputs.save_folder }}"
+
+      - name: 💾 Lưu video tải về (GitHub Artifacts - tải trực tiếp từ web)
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ inputs.slug }}-${{ github.run_number }}
+          path: ${{ inputs.save_folder }}/**
+          retention-days: 14
+
+      - name: 🏷️ Đẩy lên GitHub Releases (Nếu kích hoạt)
+        if: ${{ inputs.create_release == true }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: movie-${{ inputs.slug }}-${{ github.run_number }}
+          name: "Phim: ${{ inputs.slug }} (Run #${{ github.run_number }})"
+          body: |
+            Video tải về tự động bởi GitHub Actions:
+            - **Mã phim**: `${{ inputs.slug }}`
+            - **Tập**: `${{ inputs.episodes }}`
+            - **Thư mục lưu**: `${{ inputs.save_folder }}`
+          files: ${{ inputs.save_folder }}/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

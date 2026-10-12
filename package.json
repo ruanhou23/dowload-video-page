@@ -1,0 +1,27 @@
+{
+  "name": "ophim-downloader",
+  "version": "1.0.0",
+  "description": "Tool tải phim từ API OPhim có giao diện web - tải theo tập, theo bộ",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "cli": "node download.js"
+  },
+  "keywords": [
+    "ophim",
+    "download",
+    "movie",
+    "m3u8",
+    "ffmpeg",
+    "web"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "express": "^4.22.2",
+    "inquirer": "^10.1.0",
+    "ora": "^8.1.0"
+  }
+}

@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 OPhim Downloader</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e17;
+      color: #e2e8f0;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    /* ─── Header ───────────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1a1040 50%, #0f172a 100%);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .header-logo {
+      font-size: 28px;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    .header-title { font-size: 20px; font-weight: 700; }
+    .header-title span { color: #818cf8; }
+    .header-sub { font-size: 11px; color: #64748b; }
+    .header-nav { margin-left: auto; display: flex; gap: 8px; }
+    .nav-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover, .nav-btn.active { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #c7d2fe; }
+
+    /* ─── Main Content ─────────────────────────────────────────── */
+    .main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+    /* ─── Search ────────────────────────────────────────────────── */
+    .search-section { margin-bottom: 32px; }
+    .search-box {
+      display: flex;
+      gap: 12px;
+      background: #111827;
+      border-radius: 16px;
+      padding: 8px;
+      border: 2px solid rgba(255,255,255,0.06);
+      transition: border-color 0.3s;
+    }
+    .search-box:focus-within { border-color: rgba(99,102,241,0.5); }
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
+      font-size: 15px;
+      padding: 12px 16px;
+    }
+    .search-input::placeholder { color: #475569; }
+    .search-btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    .search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5); }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .quick-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .quick-tag {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .quick-tag:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); color: #c7d2fe; }
+
+    /* ─── Movie Grid ────────────────────────────────────────────── */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::before { content: ''; width: 4px; height: 20px; background: #6366f1; border-radius: 2px; }
+
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .movie-card {
+      background: #111827;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .movie-card:hover { transform: translateY(-4px); border-color: rgba(99,102,241,0.3); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+    .movie-poster {
+      aspect-ratio: 2/3;
+      background: #1e293b;
+      position: relative;
+      overflow: hidden;
+    }
+    .movie-poster img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .movie-card:hover .movie-poster img { transform: scale(1.08); }
+    .movie-poster .badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+    }
+    .badge.series { color: #38bdf8; }
+    .badge.single { color: #fbbf24; }
+    .badge.quality { right: 8px; left: auto; color: #4ade80; }
+    .movie-info { padding: 10px 12px 12px; }
+    .movie-name {
+      font-size: 13px;
+      font-weight: 600;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .movie-meta { font-size: 11px; color: #64748b; display: flex; gap: 8px; }
+    .movie-meta span { display: flex; align-items: center; gap: 3px; }
+
+    /* ─── Detail View ───────────────────────────────────────────── */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .detail-panel {
+      background: #111827;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s;
+    }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .detail-header {
+      position: sticky; top: 0;
+      background: linear-gradient(135deg, #1e1b4b, #111827);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      z-index: 10;
+    }
+    .detail-close {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .detail-close:hover { background: rgba(239,68,68,0.3); color: #fca5a5; }
+    .detail-body { padding: 24px; }
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .detail-info-item { display: flex; gap: 6px; }
+    .detail-info-item .label { color: #64748b; min-width: 80px; }
+    .detail-info-item .value { color: #cbd5e1; }
+
+    /* ─── Episode Grid ──────────────────────────────────────────── */
+    .server-selector { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .server-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .server-chip.active { background: rgba(99,102,241,0.2); border-color: #6366f1; color: #c7d2fe; }
+    .server-chip:hover { border-color: rgba(99,102,241,0.4); }
+
+    .episode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .episode-item {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      text-align: center;
+      font-size: 12px;
+      transition: all 0.2s;
+      position: relative;
+      user-select: none;
+    }
+    .episode-item:hover { background: rgba(99,102,241,0.08); }
+    .episode-item.selected { background: rgba(99,102,241,0.2); border-color: #6366f1; color: #c7d2fe; }
+    .episode-item.no-link { opacity: 0.4; cursor: not-allowed; }
+    .episode-item .check {
+      position: absolute; top: 4px; right: 6px;
+      font-size: 10px; color: #6366f1;
+      display: none;
+    }
+    .episode-item.selected .check { display: block; }
+
+    .episode-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .btn-select-all { background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-select-all:hover { background: rgba(255,255,255,0.12); }
+    .btn-download {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    .btn-download:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5); }
+    .btn-download:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-cancel { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+
+    /* ─── Download Progress ─────────────────────────────────────── */
+    .download-panel {
+      background: #0f172a;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .download-title { font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; }
+    .progress-bar-outer {
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+    .download-stats { font-size: 12px; color: #64748b; display: flex; justify-content: space-between; }
+    .episode-progress-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 6px;
+      margin-top: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .ep-progress-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      font-size: 12px;
+    }
+    .ep-progress-item .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.done { background: #4ade80; }
+    .status-dot.downloading { background: #fbbf24; animation: pulse 1s infinite; }
+    .status-dot.pending { background: #475569; }
+    .status-dot.error { background: #ef4444; }
+    .status-dot.skipped { background: #6366f1; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* ─── Downloaded Movies ─────────────────────────────────────── */
+    .downloaded-list { display: flex; flex-direction: column; gap: 8px; }
+    .downloaded-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+      background: #111827;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.2s;
+    }
+    .downloaded-item:hover { border-color: rgba(99,102,241,0.2); background: #151d2e; }
+    .downloaded-item .movie-title { font-weight: 600; font-size: 14px; }
+    .downloaded-item .movie-meta-info { font-size: 11px; color: #64748b; }
+    .downloaded-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-open-folder {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-open-folder:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); color: #c7d2fe; }
+    .btn-delete-item {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(239,68,68,0.25);
+      background: rgba(239,68,68,0.1);
+      color: #fca5a5;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .btn-delete-item:hover { background: rgba(239,68,68,0.25); border-color: #ef4444; color: #fff; }
+    .btn-danger {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(239,68,68,0.3);
+      background: rgba(239,68,68,0.12);
+      color: #fca5a5;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); border-color: #ef4444; color: #fee2e2; }
+    .btn-secondary {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+    .file-pill {
+      font-size: 11px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #94a3b8;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .file-del-btn {
+      color: #ef4444;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 2px;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .file-del-btn:hover { opacity: 1; }
+
+    /* ─── Loading ───────────────────────────────────────────────── */
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(99,102,241,0.2);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #475569;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* ─── Toast ─────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 999;
+      animation: slideIn 0.3s;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast.error { background: #7f1d1d; color: #fecaca; border: 1px solid #ef4444; }
+    .toast.success { background: #14532d; color: #bbf7d0; border: 1px solid #22c55e; }
+    .toast.info { background: #1e3a5f; color: #bfdbfe; border: 1px solid #3b82f6; }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .detail-overlay { padding: 16px; }
+      .movie-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+      .episode-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+      .header { padding: 12px 16px; }
+      .header-title { font-size: 16px; }
+    }
+
+    input[type="number"] {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e2e8f0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      width: 60px;
+      text-align: center;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">🎬</div>
+    <div>
+      <div class="header-title">OPhim <span>Downloader</span></div>
+      <div class="header-sub">Tải phim theo tập, theo bộ</div>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" onclick="switchTab('search')">🔍 Tìm phim</button>
+      <button class="nav-btn" onclick="switchTab('downloaded')">📁 Đã tải</button>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Tab: Search -->
+    <div id="tab-search">
+      <!-- Search Box -->
+      <section class="search-section">
+        <div class="search-box">
+          <input type="text" class="search-input" id="searchInput"
+                 placeholder="Nhập tên phim cần tìm... (VD: Trò chơi con mực)"
+                 onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="search-btn" onclick="doSearch()" id="searchBtn">🔍 Tìm kiếm</button>
+        </div>
+        <div class="quick-tags">
+          <span style="color:#64748b;font-size:12px;display:flex;align-items:center;">Xem nhanh:</span>
+          <span class="quick-tag" onclick="quickList('phim-moi')">🔥 Phim mới</span>
+          <span class="quick-tag" onclick="quickList('phim-bo')">📺 Phim bộ</span>
+          <span class="quick-tag" onclick="quickList('phim-le')">🎬 Phim lẻ</span>
+          <span class="quick-tag" onclick="quickList('hoat-hinh')">✨ Hoạt hình</span>
+          <span class="quick-tag" onclick="quickList('phim-chieu-rap')">🎭 Chiếu rạp</span>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <div id="resultsContainer"></div>
+    </div>
+
+    <!-- Tab: Downloaded -->
+    <div id="tab-downloaded" style="display:none;">
+      <!-- Cấu hình thư mục tải -->
+      <div style="background:#1e293b; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px 18px; margin-bottom:20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:280px;">
+          <span style="font-size:13px; color:#94a3b8; white-space:nowrap; font-weight:500;">📁 Thư mục lưu:</span>
+          <input type="text" id="settingDownloadDir" style="flex:1; background:#0f172a; border:1px solid rgba(255,255,255,0.15); color:#f8fafc; padding:7px 12px; border-radius:8px; font-size:13px;" placeholder="Đang tải đường dẫn..." />
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-secondary" onclick="saveDownloadDirSetting()" style="padding:7px 14px; font-size:12px;">💾 Lưu thư mục</button>
+          <button class="btn-open-folder" onclick="openCurrentDownloadDir()" style="padding:7px 14px; font-size:12px;">📂 Mở thư mục</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div class="section-title" style="margin-bottom:0;">📁 Phim đã tải về</div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button id="btnRefreshDownloaded" class="btn-secondary" onclick="loadDownloaded()">🔄 Làm mới</button>
+          <button id="btnClearAllHistory" class="btn-danger" onclick="confirmClearAll()" style="display:none;">🗑️ Xóa tất cả lịch sử</button>
+        </div>
+      </div>
+      <div id="downloadedContainer"></div>
+    </div>
+  </main>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" style="display:none;"></div>
+
+  <!-- Toast -->
+  <div id="toastContainer"></div>
+
+<script>
+// ─── State ──────────────────────────────────────────────────────────────────
+let currentMovies = [];
+let currentDetail = null;
+let currentEpisodes = [];
+let currentServerIndex = 0;
+let selectedEpisodes = new Set();
+let currentDownloadTaskId = null;
+let downloadPollInterval = null;
+let currentTab = 'search';
+let currentDownloadDir = '';
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function formatBytes(b) {
+  if(!b||b===0) return '0 B';
+  const u=['B','KB','MB','GB']; const i=Math.floor(Math.log(b)/Math.log(1024));
+  return (b/Math.pow(1024,i)).toFixed(1)+' '+u[i];
+}
+function formatSize(bytes) { return bytes ? formatBytes(bytes) : ''; }
+
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  $('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  $('tab-search').style.display = tab === 'search' ? '' : 'none';
+  $('tab-downloaded').style.display = tab === 'downloaded' ? '' : 'none';
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='search') || (i===1 && tab==='downloaded'));
+  });
+  if (tab === 'downloaded') loadDownloaded();
+}
+
+// ─── API Calls ──────────────────────────────────────────────────────────────
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) { const d=await res.json().catch(()=>({})); throw new Error(d.error||`HTTP ${res.status}`); }
+  return res.json();
+}
+
+// ─── Search ─────────────────────────────────────────────────────────────────
+async function doSearch() {
+  const kw = $('searchInput').value.trim();
+  if (!kw) { showToast('Vui lòng nhập từ khóa tìm kiếm', 'error'); return; }
+  await loadMovieList(`/api/search?keyword=${encodeURIComponent(kw)}&limit=30`, `Kết quả tìm kiếm: "${kw}"`);
+}
+
+async function quickList(slug) {
+  await loadMovieList(`/api/list/${slug}?limit=30`, `Danh sách: ${slug}`);
+}
+
+async function loadMovieList(url, title) {
+  const container = $('resultsContainer');
+  container.innerHTML = '<div class="spinner"></div>';
+  try {
+    const data = await fetchJSON(url);
+    currentMovies = data.items || [];
+    renderMovieGrid(currentMovies, title, container);
+  } catch(err) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div>${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderMovieGrid(movies, title, container) {
+  if (!movies.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📭</div>Không tìm thấy phim nào</div>`;
+    return;
+  }
+  let html = `<div class="section-title">${escapeHtml(title)} <span style="color:#64748b;font-weight:400;font-size:13px;">(${movies.length} phim)</span></div>`;
+  html += '<div class="movie-grid">';
+  movies.forEach((m,i) => {
+    const typeBadge = m.type === 'series' ? 'series' : 'single';
+    const typeText = m.type === 'series' ? 'Bộ' : 'Lẻ';
+    html += `
+      <div class="movie-card" onclick="openDetail('${escapeHtml(m.slug)}')">
+        <div class="movie-poster">
+          <img src="${escapeHtml(m.thumb_url || m.poster_url || '')}"
+               alt="" loading="lazy"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 300%22><rect fill=%22%231e293b%22 width=%22200%22 height=%22300%22/><text x=%22100%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23475569%22 font-size=%2240%22>🎬</text></svg>'">
+          <span class="badge ${typeBadge}">${typeText}</span>
+          ${m.quality ? `<span class="badge quality">${escapeHtml(m.quality)}</span>` : ''}
+        </div>
+        <div class="movie-info">
+          <div class="movie-name">${escapeHtml(m.name)}</div>
+          <div class="movie-meta">
+            <span>📅 ${m.year||'N/A'}</span>
+            <span>🌐 ${m.lang||'Vietsub'}</span>
+            ${m.episode_current ? `<span>📺 ${escapeHtml(m.episode_current)}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ─── Detail ─────────────────────────────────────────────────────────────────
+async function openDetail(slug) {
+  const modal = $('detailModal');
+  modal.style.display = 'flex';
+  modal.innerHTML = '<div class="detail-panel"><div class="spinner"></div></div>';
+
+  try {
+    const data = await fetchJSON(`/api/movie/${encodeURIComponent(slug)}`);
+    currentDetail = data;
+    const movie = data.item || data.movie;
+    currentEpisodes = movie.episodes || data.episodes || [];
+    currentServerIndex = 0;
+    selectedEpisodes = new Set();
+    renderDetail(movie);
+  } catch(err) {
+    modal.innerHTML = `<div class="detail-panel"><div class="detail-header"><h2 style="color:#fca5a5">Lỗi</h2><button class="detail-close" onclick="closeDetail()">✕</button></div><div class="detail-body">${escapeHtml(err.message)}</div></div>`;
+  }
+}
+
+function closeDetail() {
+  $('detailModal').style.display = 'none';
+  currentDetail = null;
+  if (downloadPollInterval) { clearInterval(downloadPollInterval); downloadPollInterval = null; }
+}
+
+$('detailModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDetail();
+});
+
+function renderDetail(movie) {
+  const modal = $('detailModal');
+  const typeText = movie.type === 'series' ? 'Phim bộ' : 'Phim lẻ';
+
+  let html = `<div class="detail-panel">
+    <div class="detail-header">
+      <div>
+        <h2 style="font-size:18px;">${escapeHtml(movie.name)}</h2>
+        ${movie.origin_name && movie.origin_name !== movie.name ? `<p style="color:#64748b;font-size:12px;">${escapeHtml(movie.origin_name)}</p>` : ''}
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-info-grid">
+        <div class="detail-info-item"><span class="label">Năm:</span><span class="value">${movie.year||'N/A'}</span></div>
+        <div class="detail-info-item"><span class="label">Loại:</span><span class="value">${typeText}</span></div>
+        <div class="detail-info-item"><span class="label">CL:</span><span class="value">${movie.quality||'HD'}</span></div>
+        <div class="detail-info-item"><span class="label">Ngôn ngữ:</span><span class="value">${movie.lang||'Vietsub'}</span></div>
+        <div class="detail-info-item"><span class="label">T.gian:</span><span class="value">${movie.time||'N/A'}</span></div>
+        <div class="detail-info-item"><span class="label">Tập:</span><span class="value">${movie.episode_current||'N/A'}</span></div>
+        ${movie.category?.length ? `<div class="detail-info-item"><span class="label">Thể loại:</span><span class="value">${movie.category.map(c=>escapeHtml(c.name)).join(', ')}</span></div>` : ''}
+        ${movie.country?.length ? `<div class="detail-info-item"><span class="label">Quốc gia:</span><span class="value">${movie.country.map(c=>escapeHtml(c.name)).join(', ')}</span></div>` : ''}
+      </div>`;
+
+  // Server selector
+  if (currentEpisodes.length > 0) {
+    html += `<div class="server-selector">`;
+    currentEpisodes.forEach((s, i) => {
+      const name = s.server_name || `Server ${i+1}`;
+      const ai = s.is_ai ? ' 🤖' : '';
+      const count = (s.server_data||[]).length;
+      html += `<button class="server-chip ${i===currentServerIndex?'active':''}" onclick="switchServer(${i})">${escapeHtml(name)}${ai} (${count})</button>`;
+    });
+    html += `</div>`;
+
+    // Episode grid
+    html += `<div class="episode-grid" id="episodeGrid">`;
+    const server = currentEpisodes[currentServerIndex];
+    if (server && server.server_data) {
+      server.server_data.forEach((ep, i) => {
+        const hasLink = !!ep.link_m3u8;
+        const selClass = selectedEpisodes.has(i) ? ' selected' : '';
+        const noLinkClass = !hasLink ? ' no-link' : '';
+        html += `
+          <div class="episode-item${selClass}${noLinkClass}"
+               onclick="${hasLink ? `toggleEpisode(${i})` : ''}"
+               title="${hasLink ? 'Click để chọn' : 'Không có link m3u8'}">
+            <span class="check">✓</span>
+            ${escapeHtml(ep.name || `Tập ${i+1}`)}
+          </div>`;
+      });
+    }
+    html += `</div>`;
+
+    // Actions
+    const downloadable = currentEpisodes[currentServerIndex]?.server_data?.filter(e=>e.link_m3u8)?.length || 0;
+    html += `
+      <div class="episode-actions">
+        <button class="btn btn-select-all" onclick="selectAllEpisodes()">✅ Chọn tất cả (${downloadable} tập tải được)</button>
+        <button class="btn btn-select-all" onclick="deselectAllEpisodes()">⬜ Bỏ chọn</button>
+        <button class="btn btn-download" id="btnDownload" onclick="startDownload()" disabled>
+          📥 Tải ${selectedEpisodes.size > 0 ? '('+selectedEpisodes.size+' tập)' : ''}
+        </button>
+        ${currentDownloadTaskId ? '<button class="btn btn-cancel" onclick="cancelDownload()">⏹ Hủy tải</button>' : ''}
+      </div>
+      <div style="margin-top:14px; font-size:12px; color:#94a3b8; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; background:rgba(255,255,255,0.03); padding:8px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+        <div style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+          <span>📁 Lưu vào:</span>
+          <span style="color:#c7d2fe; font-family:monospace;" id="modalSaveDirText">${escapeHtml(currentDownloadDir || 'Thư mục mặc định')}</span>
+        </div>
+        <button class="btn-secondary" onclick="quickChangeFolder()" style="padding:4px 10px; font-size:11px; border-radius:6px;">✏️ Đổi thư mục</button>
+      </div>`;
+  } else {
+    html += `<p style="color:#64748b;margin-bottom:20px;">⚠️ Phim chưa có dữ liệu tập.</p>`;
+  }
+
+  // Download progress
+  if (currentDownloadTaskId) {
+    html += `<div class="download-panel" id="downloadProgressPanel">
+      <div class="download-title"><span>📥 Đang tải...</span><span id="dlPercent">0%</span></div>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="dlProgressBar" style="width:0%"></div></div>
+      <div class="download-stats"><span id="dlStatus">Chuẩn bị...</span><span id="dlCount">0/0</span></div>
+      <div class="episode-progress-list" id="dlEpList"></div>
+    </div>`;
+  }
+
+  html += `</div></div>`;
+  modal.innerHTML = html;
+
+  updateDownloadBtn();
+
+  // Resume polling nếu có task đang chạy
+  if (currentDownloadTaskId) {
+    startProgressPolling(currentDownloadTaskId);
+  }
+}
+
+function switchServer(idx) {
+  currentServerIndex = idx;
+  selectedEpisodes = new Set();
+  if (currentDetail) {
+    const movie = currentDetail.item || currentDetail.movie;
+    renderDetail(movie);
+  }
+}
+
+function toggleEpisode(idx) {
+  if (selectedEpisodes.has(idx)) selectedEpisodes.delete(idx);
+  else selectedEpisodes.add(idx);
+  updateDownloadBtn();
+  // Update UI
+  const grid = $('episodeGrid');
+  if (grid) {
+    const items = grid.querySelectorAll('.episode-item');
+    items.forEach((el, i) => {
+      el.classList.toggle('selected', selectedEpisodes.has(i));
+    });
+  }
+}
+
+function selectAllEpisodes() {
+  const server = currentEpisodes[currentServerIndex];
+  if (!server?.server_data) return;
+  server.server_data.forEach((ep, i) => {
+    if (ep.link_m3u8) selectedEpisodes.add(i);
+  });
+  updateDownloadBtn();
+  if (currentDetail) {
+    const movie = currentDetail.item || currentDetail.movie;
+    renderDetail(movie);
+  }
+}
+
+function deselectAllEpisodes() {
+  selectedEpisodes = new Set();
+  updateDownloadBtn();
+  if (currentDetail) {
+    const movie = currentDetail.item || currentDetail.movie;
+    renderDetail(movie);
+  }
+}
+
+function updateDownloadBtn() {
+  const btn = $('btnDownload');
+  if (btn) {
+    btn.disabled = selectedEpisodes.size === 0;
+    btn.textContent = selectedEpisodes.size > 0
+      ? `📥 Tải ${selectedEpisodes.size} tập`
+      : '📥 Chọn tập cần tải';
+  }
+}
+
+// ─── Download ───────────────────────────────────────────────────────────────
+async function startDownload() {
+  if (selectedEpisodes.size === 0) {
+    showToast('Vui lòng chọn ít nhất 1 tập', 'error');
+    return;
+  }
+  if (!currentDetail) return;
+
+  const movie = currentDetail.item || currentDetail.movie;
+  const btn = $('btnDownload');
+  btn.disabled = true;
+  btn.textContent = '⏳ Đang khởi tạo...';
+
+  try {
+    const res = await fetch('/api/download/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug: movie.slug,
+        serverIndex: currentServerIndex,
+        episodes: Array.from(selectedEpisodes),
+        movieName: movie.name,
+        outputDir: currentDownloadDir || undefined,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    currentDownloadTaskId = data.taskId;
+    startProgressPolling(data.taskId);
+    renderDetail(movie); // refresh để hiện progress
+    showToast('Bắt đầu tải...', 'success');
+  } catch(err) {
+    showToast('Lỗi: ' + err.message, 'error');
+    btn.disabled = false;
+    updateDownloadBtn();
+  }
+}
+
+async function cancelDownload() {
+  if (!currentDownloadTaskId) return;
+  try {
+    await fetch(`/api/download/cancel/${currentDownloadTaskId}`, { method: 'POST' });
+    showToast('Đã hủy tải', 'info');
+  } catch(err) {
+    showToast('Lỗi hủy: ' + err.message, 'error');
+  }
+}
+
+function startProgressPolling(taskId) {
+  if (downloadPollInterval) clearInterval(downloadPollInterval);
+
+  const poll = async () => {
+    try {
+      const task = await fetchJSON(`/api/download/progress/${taskId}`);
+      updateProgressUI(task);
+
+      if (task.status === 'done' || task.status === 'error' || task.status === 'cancelled') {
+        clearInterval(downloadPollInterval);
+        downloadPollInterval = null;
+        if (task.status === 'done') {
+          showToast(`✅ Đã tải xong ${task.completed} tập phim "${task.movieName}"`, 'success');
+        } else if (task.status === 'cancelled') {
+          showToast('Đã hủy tải', 'info');
+        } else {
+          showToast('Tải thất bại', 'error');
+        }
+        // Giữ taskId để hiện kết quả, reset sau 30s
+        setTimeout(() => {
+          if (currentDownloadTaskId === taskId) {
+            currentDownloadTaskId = null;
+            if (currentDetail) {
+              const movie = currentDetail.item || currentDetail.movie;
+              renderDetail(movie);
+            }
+          }
+        }, 30000);
+      }
+    } catch(err) {
+      // task có thể đã bị xóa
+    }
+  };
+
+  poll();
+  downloadPollInterval = setInterval(poll, 1000);
+}
+
+function updateProgressUI(task) {
+  const panel = $('downloadProgressPanel');
+  if (!panel) return;
+
+  $('dlPercent').textContent = task.progress + '%';
+  $('dlProgressBar').style.width = task.progress + '%';
+  $('dlStatus').textContent = task.current ? `Đang tải: ${task.current}` : (task.status === 'done' ? 'Hoàn thành!' : '');
+  $('dlCount').textContent = `${task.completed}/${task.total}`;
+
+  // Episode list
+  const list = $('dlEpList');
+  if (list && task.episodes) {
+    list.innerHTML = task.episodes.map(ep => {
+      const statusIcon = { done:'✅', downloading:'⏳', pending:'⬜', error:'❌', skipped:'⏭️' }[ep.status] || '⬜';
+      return `<div class="ep-progress-item">
+        <div class="status-dot ${ep.status}"></div>
+        <span style="flex:1;">${escapeHtml(ep.name)}</span>
+        <span>${statusIcon}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Cập nhật nút download
+  const btn = $('btnDownload');
+  if (btn && (task.status === 'done' || task.status === 'error' || task.status === 'cancelled')) {
+    btn.disabled = false;
+    updateDownloadBtn();
+    btn.textContent = '📥 Tải lại';
+  }
+}
+
+// ─── Downloaded ─────────────────────────────────────────────────────────────
+async function loadDownloaded() {
+  const container = $('downloadedContainer');
+  const btnClear = $('btnClearAllHistory');
+  container.innerHTML = '<div class="spinner"></div>';
+  try {
+    const data = await fetchJSON('/api/downloads');
+    if (!data.length) {
+      if (btnClear) btnClear.style.display = 'none';
+      container.innerHTML = `<div class="empty-state"><div class="icon">📂</div>Chưa có phim nào được tải<br><span style="font-size:11px;">Tải phim để xem tại đây</span></div>`;
+      return;
+    }
+    if (btnClear) btnClear.style.display = 'inline-block';
+    container.innerHTML = '<div class="downloaded-list">' + data.map(m => `
+      <div class="downloaded-item">
+        <div style="flex:1; min-width:0; margin-right:12px;">
+          <div class="movie-title">🎬 ${escapeHtml(m.name)}</div>
+          <div class="movie-meta-info">${m.episodes} tập • ${formatSize(m.size)}</div>
+          ${m.fileDetails && m.fileDetails.length > 0 ? `
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+              ${m.fileDetails.map(f => `
+                <span class="file-pill">
+                  📄 ${escapeHtml(f.name)} (${formatSize(f.size)})
+                  <span class="file-del-btn" title="Xóa tập này" onclick="deleteEpisodeFile(event, '${encodeURIComponent(m.name)}', '${encodeURIComponent(f.name)}')">✕</span>
+                </span>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+        <div class="downloaded-actions">
+          <button class="btn-open-folder" onclick="openFolder('${escapeHtml(m.path)}')">📂 Mở thư mục</button>
+          <button class="btn-delete-item" onclick="confirmDeleteMovie('${encodeURIComponent(m.name)}')">🗑️ Xóa</button>
+        </div>
+      </div>
+    `).join('') + '</div>';
+  } catch(err) {
+    if (btnClear) btnClear.style.display = 'none';
+    container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div>${escapeHtml(err.message)}</div>`;
+  }
+}
+
+async function confirmDeleteMovie(encodedName) {
+  const movieName = decodeURIComponent(encodedName);
+  if (!confirm(`Bạn có chắc muốn xóa phim "${movieName}" khỏi lịch sử tải về?\nThao tác này sẽ xóa toàn bộ các file đã tải của phim này.`)) {
+    return;
+  }
+  try {
+    const res = await fetch(`/api/downloads/${encodeURIComponent(movieName)}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa');
+    showToast(`Đã xóa "${movieName}"`, 'success');
+    loadDownloaded();
+  } catch (err) {
+    showToast('Lỗi: ' + err.message, 'error');
+  }
+}
+
+async function deleteEpisodeFile(event, encodedMovieName, encodedFileName) {
+  if (event) event.stopPropagation();
+  const movieName = decodeURIComponent(encodedMovieName);
+  const fileName = decodeURIComponent(encodedFileName);
+  if (!confirm(`Bạn có chắc muốn xóa tập "${fileName}" của phim "${movieName}"?`)) {
+    return;
+  }
+  try {
+    const res = await fetch(`/api/downloads/${encodeURIComponent(movieName)}/file/${encodeURIComponent(fileName)}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa');
+    showToast(`Đã xóa tập "${fileName}"`, 'success');
+    loadDownloaded();
+  } catch (err) {
+    showToast('Lỗi: ' + err.message, 'error');
+  }
+}
+
+async function confirmClearAll() {
+  if (!confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa TOÀN BỘ lịch sử tải về?\n\nTất cả các bộ phim và tập đã tải trong thư mục downloads sẽ bị xóa vĩnh viễn!')) {
+    return;
+  }
+  try {
+    const res = await fetch('/api/downloads', {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa');
+    showToast('Đã xóa toàn bộ lịch sử tải về!', 'success');
+    loadDownloaded();
+  } catch (err) {
+    showToast('Lỗi: ' + err.message, 'error');
+  }
+}
+
+function openFolder(_path) {
+  showToast(`Thư mục: ${_path}`, 'info');
+  // Gửi yêu cầu mở thư mục qua API
+  fetch('/api/open-folder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: _path }),
+  }).catch(() => {});
+}
+
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    const data = await res.json();
+    if (data.downloadDir) {
+      currentDownloadDir = data.downloadDir;
+      const inp = $('settingDownloadDir');
+      if (inp) inp.value = currentDownloadDir;
+      const text = $('modalSaveDirText');
+      if (text) text.textContent = currentDownloadDir;
+    }
+  } catch(e) {}
+}
+
+async function saveDownloadDirSetting() {
+  const inp = $('settingDownloadDir');
+  if (!inp || !inp.value.trim()) return showToast('Vui lòng nhập đường dẫn thư mục', 'error');
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ downloadDir: inp.value.trim() }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    currentDownloadDir = data.downloadDir;
+    inp.value = currentDownloadDir;
+    const text = $('modalSaveDirText');
+    if (text) text.textContent = currentDownloadDir;
+    showToast('Đã lưu thư mục tải: ' + currentDownloadDir, 'success');
+    loadDownloaded();
+  } catch(err) {
+    showToast('Lỗi: ' + err.message, 'error');
+  }
+}
+
+async function quickChangeFolder() {
+  const newPath = prompt('Nhập đường dẫn thư mục muốn lưu video:', currentDownloadDir);
+  if (!newPath || !newPath.trim()) return;
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ downloadDir: newPath.trim() }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    currentDownloadDir = data.downloadDir;
+    const inp = $('settingDownloadDir');
+    if (inp) inp.value = currentDownloadDir;
+    const text = $('modalSaveDirText');
+    if (text) text.textContent = currentDownloadDir;
+    showToast('Đã đổi thư mục lưu: ' + currentDownloadDir, 'success');
+  } catch(err) {
+    showToast('Lỗi: ' + err.message, 'error');
+  }
+}
+
+function openCurrentDownloadDir() {
+  if (!currentDownloadDir) return;
+  openFolder(currentDownloadDir);
+}
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+// Tự động load phim mới và cấu hình khi mở trang
+window.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
+  quickList('phim-moi');
+});
+
+// Keyboard shortcut
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDetail();
+  if (e.ctrlKey && e.key === 'f') { e.preventDefault(); $('searchInput').focus(); }
+});
+</script>
+
+</body>
+</html>

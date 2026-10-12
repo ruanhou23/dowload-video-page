@@ -1,0 +1,17 @@
+{
+  "name": "OPhim Downloader Codespaces",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ffmpeg && npm install",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Web GUI",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "openFiles": ["README.md"]
+    }
+  }
+}
